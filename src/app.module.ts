@@ -1,17 +1,19 @@
 import { Global, Module } from '@nestjs/common';
-import appConfig from './config/app.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import mailerConfig from './mail/config/mailer.config';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ServiceConfigType } from './config/config.type';
+import { FilesModule } from './files/files.module';
+import fileConfig from './files/config/file.config';
+import mailerConfig from './mail/config/mailer.config';
+import appConfig from './config/app.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
     isGlobal: true,
-    load: [appConfig, mailerConfig], //, mailConfig, fileConfig
+    load: [appConfig, mailerConfig, fileConfig],
     envFilePath: ['.env'],
     }),
     MailerModule.forRootAsync({
@@ -40,7 +42,7 @@ import { ServiceConfigType } from './config/config.type';
           },
         },
       }),
-    }), MailModule],
+    }), MailModule, FilesModule],
   controllers: [],
   providers: [],
 })

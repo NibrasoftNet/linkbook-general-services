@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { AppModule } from './app.module';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import { ServiceConfigType } from './config/config.type';
 import validationOptions from './utils/validation-options';
 import { join } from 'path';
+import * as graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 const logger = new Logger('LinkBook services');
 async function bootstrap() {
@@ -22,7 +24,20 @@ async function bootstrap() {
         exclude: ['/'],
       },
   );
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
   app.useGlobalPipes(new ValidationPipe(validationOptions));
+  const options = new DocumentBuilder()
+    .setTitle('API')
+    .setDescription('API docs')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('docs', app, document);
+
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
